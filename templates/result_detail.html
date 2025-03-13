@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraping Result - {{ result.page_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Result for {{ result.page_name }}</li>
+                    </ol>
+                </nav>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h1 class="h3 mb-0">Facebook Posts from "{{ result.page_name }}"</h1>
+                        <button class="btn btn-sm btn-danger" onclick="deleteResult('{{ task_id }}')">Delete Result</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <strong>Scraped on:</strong> {{ result.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} | 
+                            <strong>Total posts:</strong> {{ result.posts|length }}
+                        </div>
+
+                        <div class="posts-container">
+                            {% for post in result.posts %}
+                            <div class="card mb-4 post-card">
+                                <div class="card-header d-flex justify-content-between">
+                                    <span class="text-muted">{{ post.time.strftime('%Y-%m-%d %H:%M') if post.time else 'Unknown date' }}</span>
+                                    <span>
+                                        <span class="badge bg-primary">{{ post.likes or 0 }} likes</span>
+                                        <span class="badge bg-info">{{ post.comments or 0 }} comments</span>
+                                        <span class="badge bg-secondary">{{ post.shares or 0 }} shares</span>
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ post.text or 'No text content' }}</p>
+                                    
+                                    {% if post.image_url and post.image_url|length > 0 %}
+                                    <div class="post-images mt-3">
+                                        <h6>Images:</h6>
+                                        <div class="row">
+                                            {% for image in post.image_url %}
+                                            <div class="col-md-4 mb-2">
+                                                <img src="{{ image }}" class="img-fluid img-thumbnail" alt="Post image">
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer">
+                                    <a href="{{ post.post_url }}" target="_blank" class="btn btn-sm btn-outline-primary">View Original Post</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/" class="btn btn-secondary">Back to Home</a>
+                    <a href="/api/results/{{ task_id }}" target="_blank" class="btn btn-outline-primary">View Raw JSON</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Facebook Scraper © 2025</span>
+        </div>
+    </footer>
+
+    <script>
+        function deleteResult(taskId) {
+            if (confirm("Are you sure you want to delete this result?")) {
+                fetch(`/results/${taskId}`, {
+                    method: 'DELETE',
+                }).then(() => {
+                    window.location.href = '/';
+                });
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facebook Scraper</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+              <h1 class="h3 mb-0">Facebook Page Scraper</h1>
+            </div>
+            <div class="card-body">
+              <form action="/scrape" method="post" class="mb-4">
+                <div class="mb-3">
+                  <label for="page_name" class="form-label"
+                    >Facebook Page Name</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="page_name"
+                    name="page_name"
+                    placeholder="e.g. MetaAI"
+                    required
+                  />
+                  <div class="form-text">
+                    Enter the name of a public Facebook page (as it appears in
+                    the URL)
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="posts_count" class="form-label"
+                    >Number of Posts</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="posts_count"
+                    name="posts_count"
+                    value="5"
+                    min="1"
+                    max="100"
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  Start Scraping
+                </button>
+              </form>
+
+              <hr />
+
+              <h2 class="h4 mb-3">Scraping Results</h2>
+              {% if results %}
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>Task ID</th>
+                      <th>Page Name</th>
+                      <th>Date</th>
+                      <th>Posts</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for task_id, result in results.items() %}
+                    <tr>
+                      <td>{{ task_id }}</td>
+                      <td>{{ result.page_name }}</td>
+                      <td>{{ result.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                      <td>{{ result.posts|length }}</td>
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <a href="/results/{{ task_id }}" class="btn btn-info"
+                            >View</a
+                          >
+                          <button
+                            class="btn btn-danger"
+                            onclick="deleteResult('{{ task_id }}')"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="alert alert-info">
+                No scraping results available yet. Start a new scrape above.
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-secondary text-white">
+              <h2 class="h4 mb-0">API Documentation</h2>
+            </div>
+            <div class="card-body">
+              <p>
+                This application also provides a REST API for programmatic
+                access:
+              </p>
+              <ul>
+                <li>
+                  <code>POST /api/scrape</code> - Start a new scraping task
+                </li>
+                <li>
+                  <code>GET /api/results/{task_id}</code> - Get results for a
+                  specific task
+                </li>
+                <li>
+                  <code>GET /api/results</code> - List all available results
+                </li>
+                <li>
+                  <code>DELETE /api/results/{task_id}</code> - Delete a specific
+                  result
+                </li>
+              </ul>
+              <p>
+                For full API documentation, visit
+                <a href="/docs" target="_blank">/docs</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+      <div class="container text-center">
+        <span class="text-muted">Facebook Scraper © 2025</span>
+      </div>
+    </footer>
+
+    <script>
+      function deleteResult(taskId) {
+        if (confirm("Are you sure you want to delete this result?")) {
+          fetch(`/results/${taskId}`, {
+            method: "DELETE",
+          }).then(() => {
+            window.location.reload();
+          });
+        }
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
