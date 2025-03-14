@@ -72,141 +72,6 @@ def get_chrome_options():
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
     return options
 
-# async def scrape_facebook_page(page_name: str, posts_count: int):
-#     try:
-#         task_id = f"{page_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-
-#         options = get_chrome_options()
-#         browser = webdriver.Chrome(options=options)
-
-#         url = f"https://www.facebook.com/{page_name}"
-#         browser.get(url)
-
-#         time.sleep(5)
-
-#         try:
-#             cookies_button = WebDriverWait(browser, 10).until(
-#                 EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Accept All')]"))
-#             )
-#             cookies_button.click()
-#             time.sleep(2)
-#         except (TimeoutException, NoSuchElementException):
-#             pass  
-        
-#         posts = []
-#         scroll_count = 0
-#         max_scrolls = posts_count * 2
-        
-#         while len(posts) < posts_count and scroll_count < max_scrolls:
-           
-#             browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-#             time.sleep(2 + random.uniform(0, 1))  
-#             scroll_count += 1
-            
-#             post_elements = browser.find_elements(By.XPATH, "//div[@role='article']")
-#             print(len(post_elements))
-            
-#             for post_element in post_elements:
-#                 if len(posts) >= posts_count:
-#                     break
-                    
-#                 try:
-                    
-#                     post_id = post_element.get_attribute("id") or f"post_{len(posts)}"
-#                     if any(p.get("post_id") == post_id for p in posts):
-#                         continue
-                    
-#                     try:
-#                         text_element = post_element.find_element(By.XPATH, ".//div[contains(@class, 'userContent')]")
-#                         text = text_element.text
-#                     except NoSuchElementException:
-#                         try:
-#                             text_element = post_element.find_element(By.XPATH, ".//div[contains(@data-ad-comet-preview, 'message')]")
-#                             text = text_element.text
-#                         except NoSuchElementException:
-#                             text = ""
-                    
-#                     # Extract image URLs
-#                     image_urls = []
-#                     try:
-#                         images = post_element.find_elements(By.XPATH, ".//img[contains(@alt, 'Image')]")
-#                         for img in images:
-#                             src = img.get_attribute("src")
-#                             if src and "http" in src:
-#                                 image_urls.append(src)
-#                     except:
-#                         pass
-                    
-#                     # Extract post URL
-#                     post_url = ""
-#                     try:
-#                         timestamp = post_element.find_element(By.XPATH, ".//a[contains(@href, '/posts/') or contains(@href, '/photo/')]")
-#                         post_url = timestamp.get_attribute("href")
-#                     except:
-#                         pass
-                    
-#                     # Extract time
-#                     post_time = ""
-#                     try:
-#                         time_element = post_element.find_element(By.XPATH, ".//a/span[contains(@class, 'timestamp')]")
-#                         post_time = time_element.text
-#                     except:
-#                         pass
-                    
-#                     # Extract reactions
-#                     likes = ""
-#                     try:
-#                         likes_element = post_element.find_element(By.XPATH, "/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div/div/div/div/div/div/div/div/div/div[2]/div/div/div[4]/div/div/div[1]/div/div[1]/div/div[1]/span[2]/span/span")
-#                         likes = likes_element.text
-#                     except:
-#                         pass
-                    
-#                     # Extract comments
-#                     comments = ""
-#                     try:
-#                         comments_element = post_element.find_element(By.XPATH, "/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div/div/div/div/div/div/div/div/div/div[2]/div/div/div[4]/div/div/div[1]/div/div[1]/div/div[2]/div[1]/span/div/span/span")
-#                         comments = comments_element.text
-#                     except:
-#                         pass
-                    
-#                     # Extract shares
-#                     shares = ""
-#                     try:
-#                         shares_element = post_element.find_element(By.XPATH, "/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div/div/div/div/div/div/div/div/div/div/div/div/div[2]/div/div/div[4]/div/div/div[1]/div/div[1]/div/div[2]/div[2]/span/div/span/span")
-#                         shares = shares_element.text
-#                     except:
-#                         pass
-                    
-#                     # Create post data
-#                     post_data = {
-#                         "post_id": post_id,
-#                         "text": text,
-#                         "post_url": post_url,
-#                         "time": post_time,
-#                         "image_urls": image_urls,
-#                         "likes": likes,
-#                         "comments": comments,
-#                         "shares": shares
-#                     }
-                    
-#                     posts.append(post_data)
-                    
-#                 except Exception as e:
-#                     print(f"Error processing post: {e}")
-    
-#         browser.quit()
-#         result = {"page_name": page_name,"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),"posts": posts}
-
-#         print(posts)
-        
-#         results_storage[task_id] = result
-        
-#         return task_id
-    
-#     except Exception as e:
-#         print(f"Error scraping {page_name}: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Scraping failed: {str(e)}")
-
 async def scrape_facebook_page(page_name: str, posts_count: int):
     try:
         task_id = f"{page_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -230,6 +95,10 @@ async def scrape_facebook_page(page_name: str, posts_count: int):
         except (TimeoutException, NoSuchElementException):
             pass  
         
+        close_button =  WebDriverWait(browser, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@aria-label='Close' and @role='button']")))
+        close_button.click()
+
+
         posts = []
         scroll_count = 0
         max_scrolls = posts_count * 3  # Increase max scrolls to ensure we find enough posts
@@ -264,6 +133,8 @@ async def scrape_facebook_page(page_name: str, posts_count: int):
                 post_elements = browser.find_elements(By.XPATH, "//div[@role='article' and not(ancestor::div[contains(@aria-label, 'Comment')])]")
                 print(f"Using alternative selector, found {len(post_elements)} post elements")
             
+            print(post_elements)
+
             # Process each post element
             for post_element in post_elements:
                 if len(posts) >= posts_count:
